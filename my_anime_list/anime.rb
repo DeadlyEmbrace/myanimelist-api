@@ -210,8 +210,6 @@ module MyAnimeList
     #  * per_page - Number of anime to return per page. Defaults to 30.
     def self.top(options = {})
 
-      raise MyAnimeList::NetworkError.new("Service is currently unavailable.")
-
       page = options[:page] || 1
       limit = (page.to_i - 1) * 30
       type = options[:type].to_s.downcase
@@ -235,10 +233,11 @@ module MyAnimeList
         next unless anime_title_node
         anime_url = anime_title_node.parent['href']
         next unless anime_url
-        anime_url.match %r{http://myanimelist.net/anime/(\d+)/?.*}
+        url_match = anime_url.match %r{/anime/(\d+)/?.*}
 
         anime = Anime.new
-        anime.id = $1.to_i
+
+        anime.id = url_match[1].to_s
         anime.title = anime_title_node.text
 
         table_cell_nodes = results_row.search('td')
